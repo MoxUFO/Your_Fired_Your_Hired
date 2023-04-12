@@ -1,0 +1,32 @@
+DROP DATABASE IF EXISTS cms_db;
+CREATE DATABASE cms_db;
+
+USE cms_db;
+
+CREATE TABLE Departments (
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  dep_name VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE Employees (
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  first_name VARCHAR(100)  NOT NULL,
+  last_name VARCHAR(100)  NOT NULL,
+  title VARCHAR(100)  NOT NULL,
+  department VARCHAR(100) NOT NULL,
+  salary INT NOT NULL,
+  manager VARCHAR(100),
+  FOREIGN KEY (department)
+  REFERENCES Departments(dep_name)
+  ON DELETE CASCADE
+);
+
+CREATE TABLE Role (
+  id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  title VARCHAR(100)  NOT NULL,
+  department VARCHAR(100) NOT NULL,
+  salary INT NOT NULL,
+  FOREIGN KEY (title)
+  REFERENCES Employees(title)
+  ON DELETE CASCADE
+);
