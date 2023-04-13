@@ -1,6 +1,12 @@
 const inquirer = require('inquirer')
 const mysql = require('mysql2')
 const cTable = require('console.table')
+const express = require('express');
+
+const app = express();
+
+app.use(express.urlencoded({ extended: false}));
+app.use(express.json());
 
 const db = mysql.createConnection(
     {
@@ -14,9 +20,9 @@ const db = mysql.createConnection(
 
 async function menu(){
 
-    const {name} = await inquirer.prompt([{
+    const {menuChoice} = await inquirer.prompt([{
         type: 'list',
-        name: 'menu-item',
+        name: 'menuChoice',
         message: 'What would you like to do?',
         choices:
         ['View all employees.',
@@ -29,62 +35,102 @@ async function menu(){
         'Exit!']
       },
     ])
-    console.log(name);
-//   switch (name) {
-//     case 'View all employees.':
-//       showEmployees()
-//       break;
-//     case 'Add employee.':
-//       addEmployee()
-//       break;
-//     case 'Update empolyee role.':
-//       updateRole()
-//       break;
-//       case 'View all roles.':
-//       showRoles()
-//       break;
-//       case 'Add role.':
-//       addRole()
-//       break;
-//       case 'View all departments.':
-//       showDepartments()
-//       break;
-//       case 'Add department':
-//       addDeparement()
-//       break;
-//     default: 'Exit!'
-//       console.log('Invalid color!');
-//       break;
-//   }
-
-
-
-
-   
-    //switch statement to call other functions
+    console.log(menuChoice);
+      switch (menuChoice) {
+    case 'View all employees.':
+      showEmployees()
+      break;
+    case 'Add employee.':
+      addEmployee()
+      break;
+    case 'Update empolyee role.':
+      updateRole()
+      break;
+      case 'View all roles.':
+      showRoles()
+      break;
+      case 'Add role.':
+      addRole()
+      break;
+      case 'View all departments.':
+      showDepartments()
+      break;
+      case 'Add department':
+      addDeparement()
+      break;
+    default: 'Exit!'
+      console.log('Invalid color!');
+      break;
+  }
 }
 
 
 function showDepartments(){
-    //show the departments
-    menu()
+    const sql = `SELECT * FROM Departments`;
+    db.query(sql, (err, rows) => {
+        console.log(err);
+        console.log(rows);
+
+        // if (err) {
+        //   res.status(500).json({ error: err.message });
+        //    return;
+        // }
+        // res.json({
+        //   message: 'success',
+        //   data: rows
+        // });
+        // console.log(sql);
+      });
+
+      
+    // menu()
 }
 
-function addDeparement(params) {
-    inquirer.prompt([
+async function addDeparement(params) {
+    const {dep_name} = await inquirer.prompt([
         {
           type: 'input',
           name: 'dep_name',
           message: 'What is the Department name?',
         },
       ])
+      console.log(dep_name);
+      const sql = `INSERT INTO Departments (dep_name)
+      VALUES ("${dep_name}");`;
+    db.query(sql, (err, rows) => {
+        console.log(err);
+        // console.log(rows);
 
-      menu()
+        // if (err) {
+        //   res.status(500).json({ error: err.message });
+        //    return;
+        // }
+        // res.json({
+        //   message: 'success',
+        //   data: rows
+        // });
+        // console.log(sql);
+      });
+    //   menu()
 }
 
 function showEmployees(){
-    //
-    menu()
+    const sql = `SELECT * FROM employees e JOIN Roles r ON e.role_id = r.id JOIN Departments d ON r.department_id = d.id;`
+    db.query(sql, (err, rows) => {
+        console.log(err);
+        console.log(rows);
+
+        // if (err) {
+        //   res.status(500).json({ error: err.message });
+        //    return;
+        // }
+        // res.json({
+        //   message: 'success',
+        //   data: rows
+        // });
+        // console.log(sql);
+      });
+    // menu()
 }
 
 function addEmployee(params) {
@@ -127,12 +173,26 @@ function addEmployee(params) {
           },   
       ])
 
-      menu()
+    //   menu()
 }
 
 function showRoles (){
-    //
-    menu()
+    const sql = `SELECT r.id, r.title, r.salary, d.dep_name AS department FROM roles r JOIN Departments d ON r.department_id = d.id;`
+    db.query(sql, (err, rows) => {
+        console.log(err);
+        console.log(rows);
+
+        // if (err) {
+        //   res.status(500).json({ error: err.message });
+        //    return;
+        // }
+        // res.json({
+        //   message: 'success',
+        //   data: rows
+        // });
+        // console.log(sql);
+      });
+    // menu()
 }
 
 function addRole(params) {
@@ -161,7 +221,7 @@ function addRole(params) {
           },  
       ])
 
-      menu()
+    //   menu()
 }
 
 function updateRole(params) {
@@ -194,7 +254,7 @@ function updateRole(params) {
           },
       ])
 
-      menu()
+    //   menu()
 }
 
 menu()
