@@ -29,7 +29,6 @@ async function menu(){
         'Exit!']
       },
     ])
-    return console.log(name);;
     console.log(name);
 //   switch (name) {
 //     case 'View all employees.':
