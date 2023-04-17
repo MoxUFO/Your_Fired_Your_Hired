@@ -28,7 +28,7 @@ const db = mysql.createConnection(
 
 
 
-getManagerId()
+// getManagerId()
 
 async function menu() {
   const { menuChoice } = await inquirer.prompt([
@@ -73,8 +73,7 @@ async function menu() {
       break;
     default:
       "Exit!";
-      console.log("Invalid color!");
-      break;
+      return;
   }
 }
 // let test = function getAllManagers() {
@@ -220,13 +219,15 @@ function showRoles() {
 }
 
 async function addRole() {
-  const fetchRole = `SELECT * FROM Departments`;
-  db.query(sql, (err, result) => {
-    // console.log(rows)
-    console.table(result);
-  });
+  const answers = []
+  const query = `SELECT * FROM Departments`
+    db.query(query, (err, results) => {
+      for (let i = 0; i < results.length; i++) {
+       answers.push(results[i].dep_name)
+      }
+    });
 
-  const { newRole, salary, depName } = await inquirer.prompt([
+ const {newRole,salary,depName} = await inquirer.prompt([
     {
       type: "input",
       name: "newRole",
@@ -241,21 +242,29 @@ async function addRole() {
       type: "list",
       name: "depName",
       message: "What department does the role belong to?",
-      choices: ["Engineering.", "Finance.", "Legal.", "Sales."],
+      choices:answers ,
     },
-  ]);
-  const sql = `INSERT INTO Role (title, department_id,salary)
-  VALUES ("${newRole},${depName},${salary}");`;
-  db.query(sql, (err, rows) => {
-    if (err) {
-      console.log(err);
-      return;
-    }
-  });
-  //   menu()
+  ])
+  const departmentId = `SELECT id FROM Departments WHERE dep_name = "${depName}" `
+ db.query(departmentId, (err,result) =>{
+  const depId =result[0].id;
+  const sql = `INSERT INTO Roles  (title, department_id,salary) VALUES ("${newRole}",${depId},${salary})`
+  db.query(sql, (err,result) =>{
+    console.log(err);
+  })
+ })
 }
 
 async function updateRole() {
+
+  const EmployeeArr = []
+  const query = `SELECT * FROM Departments`
+    db.query(query, (err, rents) => {
+      for (let i = 0; i < rents.length; i++) {
+       answers.push(rents[i].dep_name)
+      }
+    });
+
   const { updateWho, addedRole } = await inquirer.prompt([
     {
       type: "list",
@@ -276,7 +285,7 @@ async function updateRole() {
       type: "list",
       name: "addedRole",
       message: "Which role do you want to assaign the employeee?",
-      choices: [[
+      choices: [
         "Lead Engineer",
         "Software Engineer",
         "Account Manager",
@@ -285,12 +294,13 @@ async function updateRole() {
         "Lawyer",
         "Sales Lead",
         "Salesperson",
-      ]],
+      ],
     },
   ]);
+  console.log(addedRole);
   //   menu()
 }
 
-// menu();
+menu();
 
 // use async await for your queries and set up your connection so you don't use callbacks in mysql
