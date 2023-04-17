@@ -177,7 +177,7 @@ async function addEmployee() {
   ]);
   const first = manager.split(" ")[0];
   const last = manager.split(" ")[1];
-  const ManagerId = ` SELECT id FROM Employees WHERE manager_id IS NULL AND first_name = '${first}' AND last_name = '${last}';`;
+  const ManagerId = ` SELECT id FROM Employees WHERE  first_name = '${first}' AND last_name = '${last}';`;
 
   db.query(ManagerId, (err, result) => {
     const useableId = result[0].id;
@@ -208,7 +208,7 @@ async function addEmployee() {
 function showRoles() {
   const sql = `SELECT r.id, r.title, r.salary, d.dep_name AS department FROM roles r JOIN Departments d ON r.department_id = d.id;`;
   db.query(sql, (err, results) => {
-    console.log(results);
+    console.table(results);
     // console.table(results)
     if (err) {
       console.log(err);;
@@ -255,49 +255,51 @@ async function addRole() {
  })
 }
 
-async function updateRole() {
+function updateRole() {
 
-  const EmployeeArr = []
-  const query = `SELECT * FROM Departments`
-    db.query(query, (err, rents) => {
-      for (let i = 0; i < rents.length; i++) {
-       answers.push(rents[i].dep_name)
+  const employeeArr = []
+  const nameQuery = `SELECT first_name,Last_name FROM Employees;`
+  const roleQuery = `SELECT title FROM Roles;`
+  const roleArr = []
+
+
+    db.query(nameQuery, (err, result) => {
+      // console.log(result);
+      for (let i = 0; i < result.length; i++) {
+      //  const person = result[i].first_name + " " + result[i].Last_name;
+      //  console.log(person);
+        employeeArr.push(result[i].first_name + " " + result[i].Last_name)
       }
+      // console.log(employeeArr);
     });
-
-  const { updateWho, addedRole } = await inquirer.prompt([
-    {
-      type: "list",
-      name: "updateWho",
-      message: "Which employee role do you want to update?",
-      choices: [
-        "Ashley Rodriguez",
-        "Kevin Tupik",
-        "Kunal Singh",
-        "Malia Brown",
-        "Sarah Lourd",
-        "Tom Allen",
-        "John Doe",
-        "Mike Chan",
-      ],
-    },
-    {
-      type: "list",
-      name: "addedRole",
-      message: "Which role do you want to assaign the employeee?",
-      choices: [
-        "Lead Engineer",
-        "Software Engineer",
-        "Account Manager",
-        "Accountant",
-        "Legal Team Lead",
-        "Lawyer",
-        "Sales Lead",
-        "Salesperson",
-      ],
-    },
-  ]);
-  console.log(addedRole);
+console.log(employeeArr);
+   
+      db.query(roleQuery, (err, result) => {
+        // console.log(result);
+        for (let i = 0; i < result.length; i++) {
+         const role = result[i].title
+        employeeArr.push(role)
+        }
+      });
+  
+// console.log(employeeArr);
+// console.log('-----------');
+// console.log(roleArr);
+  // const { updateWho, addedRole } = await inquirer.prompt([
+  //   {
+  //     type: "list",
+  //     name: "updateWho",
+  //     message: "Which employee role do you want to update?",
+  //     choices: employeeArr,
+  //   },
+  //   {
+  //     type: "list",
+  //     name: "addedRole",
+  //     message: "Which role do you want to assaign the employeee?",
+  //     choices: roleArr
+  //   },
+  // ]);
+  // console.log(addedRole);
   //   menu()
 }
 
