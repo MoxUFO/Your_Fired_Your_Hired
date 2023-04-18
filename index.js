@@ -68,12 +68,13 @@ function showDepartments() {
   const sql = `SELECT * FROM Departments`;
   db.query(sql, (err, result) => {
     console.table(result);
+    menu()
     if (err) {
       console.log(err);;
        return;
     }
   });
-  //   menu()
+   
 }
 
 async function addDeparement(params) {
@@ -89,24 +90,26 @@ async function addDeparement(params) {
       VALUES ("${dep_name}");`;
   db.query(sql, (err, result) => {
     console.table(result);
+    menu()
     if (err) {
       console.log(err);;
       return;
     }
   });
-  //   menu()
+    
 }
 
 function showEmployees() {
   const sql = `SELECT e.id, e.first_name, e.last_name, e.manager_id, r.title, d.dep_name FROM employees e JOIN Roles r ON e.role_id = r.id  JOIN Departments d ON r.department_id = d.id; `;
   db.query(sql, (err, results) => {
     console.table(results);
+    menu()
     if (err) {
       console.log(err);;
       return;
     }
   });
-  //   menu()
+    
 }
 
 async function addEmployee() {
@@ -161,6 +164,7 @@ async function addEmployee() {
 
   db.query(sql, (err, result) => {
       console.log(err);
+      console.table(result);
     });
   });
 
@@ -172,23 +176,25 @@ async function addEmployee() {
     SET role_id = ${role}
     WHERE first_name = "${firstName}" AND last_name = "${lastName}";`;
     db.query(sql, (err, result) => {
-      console.log(result);
+      console.table(result);
       console.log(err);
+      menu()
     });
   });
-  //   menu()
+    
 }
 
 function showRoles() {
   const sql = `SELECT r.id, r.title, r.salary, d.dep_name AS department FROM roles r JOIN Departments d ON r.department_id = d.id;`;
   db.query(sql, (err, results) => {
     console.table(results);
+    menu()
     if (err) {
       console.log(err);;
       return;
     }
   });
-  // menu()
+  
 }
 
 async function addRole() {
@@ -224,8 +230,11 @@ async function addRole() {
   const sql = `INSERT INTO Roles  (title, department_id,salary) VALUES ("${newRole}",${depId},${salary})`
   db.query(sql, (err,result) =>{
     console.log(err);
+    console.table(result);
+    menu()
   })
  })
+ 
 }
 
 async function updateRole() {
@@ -266,12 +275,15 @@ async function updateRole() {
   const departmentId = `SELECT id FROM Roles WHERE title = "${newRole}" `
   db.query(departmentId, (err,result) =>{
   const roleId =result[0].id;
-  // console.log(first + " " + last);
-  const sql = ` SET SQL_SAFE_UPDATES = 0; UPDATE Employees SET role_id = 4 WHERE first_name = 'fsf' AND last_name = 'sdf'; SET SQL_SAFE_UPDATES = 1;`
+  console.log(result);
+  const sql = `UPDATE Employees SET role_id = ${roleId} WHERE first_name = "${first}" AND last_name = "${last}"`
   db.query(sql, (err,result) =>{
-    console.log(err);
+    console.table(err);
+    console.table(result);
+    menu()
   })
  })
+ 
 }
 
 menu();
