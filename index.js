@@ -4,7 +4,6 @@ const cTable = require("console.table");
 const express = require("express");
 
 const app = express();
-
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
@@ -18,18 +17,6 @@ const db = mysql.createConnection(
   console.log(`Connected to the cms_db database.`)
 );
 
-//  async function getManagerId() {
-//   let sql = ` SELECT * FROM Employees;`;
-//   let theTable = await  db.query(sql, (err, result) => {
-//     return result;
-//   });
-//   console.log(theTable); 
-// }
-
-
-
-// getManagerId()
-
 async function menu() {
   const { menuChoice } = await inquirer.prompt([
     {
@@ -37,13 +24,13 @@ async function menu() {
       name: "menuChoice",
       message: "What would you like to do?",
       choices: [
-        "View all employees.",
-        "Add employee.",
-        "Update empolyee role.",
-        "View all roles.",
-        "Add role.",
         "View all departments.",
-        "Add department",
+        "View all roles.",
+        "View all employees.",
+        "Add department.",
+        "Add employee.",
+        "Add role.",
+        "Update employee role.",
         "Exit!",
       ],
     },
@@ -56,7 +43,7 @@ async function menu() {
     case "Add employee.":
       addEmployee();
       break;
-    case "Update empolyee role.":
+    case "Update employee role.":
       updateRole();
       break;
     case "View all roles.":
@@ -68,7 +55,7 @@ async function menu() {
     case "View all departments.":
       showDepartments();
       break;
-    case "Add department":
+    case "Add department.":
       addDeparement();
       break;
     default:
@@ -76,24 +63,16 @@ async function menu() {
       return;
   }
 }
-// let test = function getAllManagers() {
-//   const sql = `SELECT id FROM Employees WHERE manager_id IS NULL AND first_name = 'Ashley' AND last_name = 'Rodriguez';`;
-//   db.query(sql, (err, result) => {
-//     console.log(result[0].id);
-//   });
-// };
 
 function showDepartments() {
   const sql = `SELECT * FROM Departments`;
   db.query(sql, (err, result) => {
-    // console.log(rows)
     console.table(result);
     if (err) {
       console.log(err);;
        return;
     }
   });
-
   //   menu()
 }
 
@@ -121,7 +100,6 @@ async function addDeparement(params) {
 function showEmployees() {
   const sql = `SELECT e.id, e.first_name, e.last_name, e.manager_id, r.title, d.dep_name FROM employees e JOIN Roles r ON e.role_id = r.id  JOIN Departments d ON r.department_id = d.id; `;
   db.query(sql, (err, results) => {
-    // console.log(results);
     console.table(results);
     if (err) {
       console.log(err);;
@@ -132,6 +110,22 @@ function showEmployees() {
 }
 
 async function addEmployee() {
+
+  const personAnswers = []
+  const roleAnswers = []
+  const personQuery = `SELECT * FROM Employees`
+    db.query(personQuery, (err, results) => {
+      for (let i = 0; i < results.length; i++) {
+       personAnswers.push(results[i].first_name + " " + results[i].last_name)
+      }
+    });
+    const roleQuery = `SELECT * FROM Roles`
+    db.query(roleQuery, (err, results) => {
+      for (let i = 0; i < results.length; i++) {
+       roleAnswers.push(results[i].title)
+      }
+    });
+
   const { firstName, lastName, assignedRole, manager } = await inquirer.prompt([
     {
       type: "input",
@@ -147,32 +141,13 @@ async function addEmployee() {
       type: "list",
       name: "assignedRole",
       message: "What employee's role?",
-      choices: [
-        "Lead Engineer",
-        "Software Engineer",
-        "Account Manager",
-        "Accountant",
-        "Legal Team Lead",
-        "Lawyer",
-        "Sales Lead",
-        "Salesperson",
-      ],
+      choices: roleAnswers
     },
-
     {
       type: "list",
       name: "manager",
       message: "Who is the employee's manager?",
-      choices: [
-        "Ashley Rodriguez",
-        "Kevin Tupik",
-        "Kunal Singh",
-        "Malia Brown",
-        "Sarah Lourd",
-        "Tom Allen",
-        "John Doe",
-        "Mike Chan",
-      ],
+      choices: personAnswers,
     },
   ]);
   const first = manager.split(" ")[0];
@@ -184,7 +159,7 @@ async function addEmployee() {
     const sql = `INSERT INTO Employees (first_name,last_name,role_id,manager_id)
     VALUES ('${firstName}', '${lastName}',null ,${useableId});`;
 
-    db.query(sql, (err, result) => {
+  db.query(sql, (err, result) => {
       console.log(err);
     });
   });
@@ -201,7 +176,6 @@ async function addEmployee() {
       console.log(err);
     });
   });
-
   //   menu()
 }
 
@@ -209,7 +183,6 @@ function showRoles() {
   const sql = `SELECT r.id, r.title, r.salary, d.dep_name AS department FROM roles r JOIN Departments d ON r.department_id = d.id;`;
   db.query(sql, (err, results) => {
     console.table(results);
-    // console.table(results)
     if (err) {
       console.log(err);;
       return;
@@ -226,8 +199,8 @@ async function addRole() {
        answers.push(results[i].dep_name)
       }
     });
-
- const {newRole,salary,depName} = await inquirer.prompt([
+    console.log(answers);
+  const {newRole,salary,depName} = await inquirer.prompt([
     {
       type: "input",
       name: "newRole",
@@ -246,7 +219,7 @@ async function addRole() {
     },
   ])
   const departmentId = `SELECT id FROM Departments WHERE dep_name = "${depName}" `
- db.query(departmentId, (err,result) =>{
+  db.query(departmentId, (err,result) =>{
   const depId =result[0].id;
   const sql = `INSERT INTO Roles  (title, department_id,salary) VALUES ("${newRole}",${depId},${salary})`
   db.query(sql, (err,result) =>{
@@ -255,52 +228,50 @@ async function addRole() {
  })
 }
 
-function updateRole() {
-
-  const employeeArr = []
-  const nameQuery = `SELECT first_name,Last_name FROM Employees;`
-  const roleQuery = `SELECT title FROM Roles;`
-  const roleArr = []
-
-
-    db.query(nameQuery, (err, result) => {
-      // console.log(result);
-      for (let i = 0; i < result.length; i++) {
-      //  const person = result[i].first_name + " " + result[i].Last_name;
-      //  console.log(person);
-        employeeArr.push(result[i].first_name + " " + result[i].Last_name)
-      }
-      // console.log(employeeArr);
-    });
-console.log(employeeArr);
-   
-      db.query(roleQuery, (err, result) => {
-        // console.log(result);
-        for (let i = 0; i < result.length; i++) {
-         const role = result[i].title
-        employeeArr.push(role)
-        }
-      });
+async function updateRole() {
+  const personAnswers = []
+  const query = `SELECT * FROM Employees`
+  let employeeList = await db.promise().query(query);
+  // console.log(employeeList);
+    for (let i = 0; i < employeeList[0].length; i++) {
+     personAnswers.push(employeeList[0][i].first_name + " " + employeeList[0][i].last_name)
+    }
   
-// console.log(employeeArr);
-// console.log('-----------');
-// console.log(roleArr);
-  // const { updateWho, addedRole } = await inquirer.prompt([
-  //   {
-  //     type: "list",
-  //     name: "updateWho",
-  //     message: "Which employee role do you want to update?",
-  //     choices: employeeArr,
-  //   },
-  //   {
-  //     type: "list",
-  //     name: "addedRole",
-  //     message: "Which role do you want to assaign the employeee?",
-  //     choices: roleArr
-  //   },
-  // ]);
-  // console.log(addedRole);
-  //   menu()
+    const roleAnswers = []
+    const roleQuery = `SELECT * FROM Roles`
+    let roleList = await db.promise().query(roleQuery);
+
+      for (let i = 0; i < roleList[0].length; i++) {
+       roleAnswers.push(roleList[0][i].title)
+      }
+      // console.log(roleAnswers, personAnswers);
+    
+  const {personName,newRole} = await inquirer.prompt([
+
+    {
+      type: "list",
+      name: "personName",
+      message: "Which employee's role do you want to update?",
+      choices: personAnswers ,
+    },
+    {
+      type: "list",
+      name: "newRole",
+      message: "What is the role do you want to assaign?",
+      choices: roleAnswers ,
+    },
+  ])
+  const first = personName.split(" ")[0];
+  const last = personName.split(" ")[1];
+  const departmentId = `SELECT id FROM Roles WHERE title = "${newRole}" `
+  db.query(departmentId, (err,result) =>{
+  const roleId =result[0].id;
+  // console.log(first + " " + last);
+  const sql = ` SET SQL_SAFE_UPDATES = 0; UPDATE Employees SET role_id = 4 WHERE first_name = 'fsf' AND last_name = 'sdf'; SET SQL_SAFE_UPDATES = 1;`
+  db.query(sql, (err,result) =>{
+    console.log(err);
+  })
+ })
 }
 
 menu();

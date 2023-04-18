@@ -54,4 +54,54 @@ function getManagerId() {
   
   }
   getManagerId();
+
+  async function updateRole() {
+    const personAnswers = []
+    const personQuery = `SELECT * FROM Employees`
+      db.query(personQuery, (err, results) => {
+        for (let i = 0; i < results.length; i++) {
+         answers.push(results[i].first_name)
+        }
+      });
+      const answers = []
+      const roleQuery = `SELECT * FROM Roles`
+        db.query(roleQuery, (err, results) => {
+          for (let i = 0; i < results.length; i++) {
+           answers.push(results[i].title)
+          }
+        });
+      // console.log(answers);
+    const {depName} = await inquirer.prompt([
+      {
+        type: "list",
+        name: "employee",
+        message: "Which employee's role will be updated?",
+        choices: personAnswers
+      },
+      {
+        type: "list",
+        name: "newRole",
+        message: "what is the employee's New role?",
+        choices: answers ,
+      },
+    ])
+  }
+
+  SET SQL_SAFE_UPDATES = 0;
+UPDATE Employees
+SET role_id = 2
+WHERE first_name = 'wesrt' AND last_name = 'food';
+SET SQL_SAFE_UPDATES = 1;
+
+
+
+const deptAnswers = []
+const query = `SELECT department_name FROM department`
+let deptList = await db.promise().query(query);
+console.log(depList);
+  // for (let i = 0; i < employeeList[0].length; i++) {
+  //  personAnswers.push(employeeList[0][i].first_name + " " + employeeList[0][i].last_name)
+  // }
+
+  
   
