@@ -30,7 +30,7 @@ npm install
 
 ## Usage
 
-User is connects to indes js file and run node index or npm start. user is then presented with a question asking user how they wish to navagate the database.
+When user is connected to index js file and run node index or npm start. user is then presented with a question asking user how they wish to navagate the database.
 User can use he menu to view all departments, roles ,and employees that are stored in the database. These 3  options then display a table in the terminal showing each table indivdually, based on the menu option selected. All other options besides 'Exit', will allow user to make addtions to the database based on adding a new department, making a new role, or hiring a new employee. 
 
 Photo of inquirer propmts user will see.
